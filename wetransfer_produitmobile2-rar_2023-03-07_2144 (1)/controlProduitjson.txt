@@ -1,0 +1,84 @@
+
+    /**
+     * @Route("/addproduitJSON",name="addproduitJSON")
+     */
+    public function addproduitJSON(Request $request,NormalizerInterface $normalizer)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $facture = new Produit();
+        $facture->setNomProduit($request->get('NomProduit'));
+
+        $facture->setImageProduit($request->get('ImageProduit'));
+        $facture->setPrixProduit($request->get('PrixProduit'));
+
+        $facture->setDescriptionProduit($request->get('DescriptionProduit'));
+        $facture->setQuantiteProduit($request->get('QuantiteProduit'));
+        //  $facture->setDateC($request->get('dateC'));
+
+        $em->persist($facture);
+        $em->flush();
+        $jsonContent = $normalizer->normalize($facture,'json',['groups'=>'post:read']);
+        return new Response(json_encode($jsonContent));
+
+
+    }
+    /**
+     * @Route("/allProduits", name="AllProduits")
+     */
+    public function AllProduits(NormalizerInterface $normalizer)
+    {
+        $repository = $this->getDoctrine()->getRepository(Produit::class);
+        $reclamation = $repository->findAll();
+        $jsonContent = $normalizer->normalize($reclamation, 'json', ['groups' => 'post:read']);
+
+        return new Response(json_encode($jsonContent));
+    }
+
+    /**
+     * @Route("/produitid{id}", name="Produit")
+     */
+    public function produitsid(Request $request, $id, NormalizerInterface $normalizer)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $utilisateur = $em->getRepository(Produit::class)->find($id);
+        $jsonContent = $normalizer->normalize($utilisateur, 'json', ['groups' => 'post:read']);
+
+        return new Response(json_encode($jsonContent));
+
+    }
+
+    /**
+     * @Route("/deleteproduitJSON/{id}", name="deleteproduitJSON")
+     */
+    public function deleteproduitjson(Request $request, NormalizerInterface $normalizer, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $utilisateur = $em->getRepository(Produit::class)->find($id);
+        $em->remove($utilisateur);
+        $em->flush();
+        $jsonContent = $normalizer->normalize($utilisateur, 'json', ['groups' => 'post:read']);
+        return new Response(json_encode($jsonContent));
+    }
+
+    /**
+     * @Route("/updateteproduitJSON", name="updateproduitJSON")
+     */
+    public function updateproduitjson(Request $request, NormalizerInterface $normalizer){
+
+        $em = $this->getDoctrine()->getManager();
+        $utilisateur = $em->getRepository(Produit::class)->find($request->get("id"));
+
+        $utilisateur->setNomProduit($request->get('NomProduit'));
+
+
+        $utilisateur->setImageProduit($request->get('ImageProduit'));
+        $utilisateur->setPrixProduit($request->get('PrixProduit'));
+        $utilisateur->setDescriptionProduit($request->get('DescriptionProduit'));
+        $utilisateur->setQuantiteProduit($request->get('QuantiteProduit'));
+
+        $em->persist($utilisateur);
+        $em->flush();
+        $jsonContent = $normalizer->normalize($utilisateur, 'json', ['groups' => 'post:read']);
+        return new Response(json_encode($jsonContent));
+    }
+
